@@ -3,6 +3,27 @@ import pandas as pd
 import os
 from datetime import datetime
 
+def calculate_execution_score(row):
+    planned = row["planned_tasks"]
+    completed = row["completed_tasks"]
+    deep_work = row["deep_work_hours"]
+    distraction = row["distraction_hours"]
+    energy = row["energy_level"]
+
+    # Avoid division by zero
+    completion = completed / planned if planned > 0 else 0
+    total_time = deep_work + distraction
+    focus = deep_work / total_time if total_time > 0 else 0
+    energy_factor = energy / 10
+
+    score = (
+        completion * 0.5 +
+        focus * 0.3 +
+        energy_factor * 0.2
+    ) * 100
+
+    return round(score, 2)
+
 st.set_page_config(page_title="Execution OS", layout="wide")
 
 DATA_PATH = "data/logs.csv"
@@ -29,9 +50,24 @@ st.title("🔥 Execution OS")
 # ===========================
 if page == "Dashboard":
     st.header("Dashboard")
+
     df = pd.read_csv(DATA_PATH)
-    st.write("Total Entries:", len(df))
-    st.dataframe(df)
+
+    if len(df) == 0:
+        st.info("No data yet. Start logging your days.")
+    else:
+        # Calculate score for each row
+        df["execution_score"] = df.apply(calculate_execution_score, axis=1)
+
+        latest_score = df.iloc[-1]["execution_score"]
+
+        st.metric("🔥 Today's Execution Score", f"{latest_score}/100")
+
+        st.subheader("All Entries")
+        st.dataframe(df)
+
+        st.subheader("Score Trend")
+        st.line_chart(df["execution_score"])
 
 # ===========================
 # DAILY LOG
