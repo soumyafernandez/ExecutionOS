@@ -56,13 +56,41 @@ if page == "Dashboard":
     if len(df) == 0:
         st.info("No data yet. Start logging your days.")
     else:
-        # Calculate score for each row
         df["execution_score"] = df.apply(calculate_execution_score, axis=1)
 
         latest_score = df.iloc[-1]["execution_score"]
 
         st.metric("🔥 Today's Execution Score", f"{latest_score}/100")
+        
+        weekly_avg = df["execution_score"].tail(7).mean()
+        st.metric("📊 Weekly Average Score", round(weekly_avg,2))
+        
+        # Streak counter 
+        streak = 0
+        for score in reversed(df["execution_score"]):
+            if score >= 70:
+                streak += 1
+            else:
+                break
 
+        st.metric("🔥 High Performance Streak", streak)
+        
+        # Best day
+        best_day = df.loc[df["execution_score"].idxmax()]
+
+        st.write("🏆 Best Day:", best_day["date"])
+        st.write("Best Score:", best_day["execution_score"])
+        
+        # Insight message 
+        if latest_score >= 80:
+            st.success("Excellent execution today 🚀")
+
+        elif latest_score >= 60:
+            st.info("Solid progress. Push a bit harder tomorrow.")
+
+        else:
+            st.warning("Execution was weak today. Reduce distractions.")
+        
         st.subheader("All Entries")
         st.dataframe(df)
 
@@ -99,3 +127,4 @@ elif page == "Daily Log":
             df.to_csv(DATA_PATH, index=False)
 
             st.success("Entry Saved Successfully ✅")
+            
