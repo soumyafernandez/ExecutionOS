@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
 from datetime import datetime
 
 def calculate_execution_score(row):
@@ -93,6 +94,33 @@ if page == "Dashboard":
         
         st.subheader("All Entries")
         st.dataframe(df)
+
+        # Deep work vs distraction
+        st.subheader("Deep Work vs Distraction")
+
+        fig, ax = plt.subplots()
+        ax.plot(df["deep_work_hours"], label="Deep Work")
+        ax.plot(df["distraction_hours"], label="Distraction")
+        ax.legend()
+        st.pyplot(fig)
+
+        # Task completion
+        st.subheader("Task Completion Trend")
+
+        fig2, ax2 = plt.subplots()
+        ax2.plot(df["planned_tasks"], label="Planned Tasks")
+        ax2.plot(df["completed_tasks"], label="Completed Tasks")
+        ax2.legend()
+        st.pyplot(fig2)
+
+        # Score over time
+        st.subheader("Execution Score Over Time")
+
+        df["date"] = pd.to_datetime(df["date"])
+
+        fig3, ax3 = plt.subplots()
+        ax3.plot(df["date"], df["execution_score"])
+        st.pyplot(fig3)
 
         st.subheader("Score Trend")
         st.line_chart(df["execution_score"])
