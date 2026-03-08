@@ -60,11 +60,7 @@ if page == "Dashboard":
         df["execution_score"] = df.apply(calculate_execution_score, axis=1)
 
         latest_score = df.iloc[-1]["execution_score"]
-
-        st.metric("🔥 Today's Execution Score", f"{latest_score}/100")
-        
         weekly_avg = df["execution_score"].tail(7).mean()
-        st.metric("📊 Weekly Average Score", round(weekly_avg,2))
         
         # Streak counter 
         streak = 0
@@ -73,8 +69,12 @@ if page == "Dashboard":
                 streak += 1
             else:
                 break
+        
+        col1, col2, col3 = st.columns(3)
 
-        st.metric("🔥 High Performance Streak", streak)
+        col1.metric("🔥 Today's Execution Score", f"{latest_score}/100")
+        col2.metric("📊 Weekly Average Score", round(weekly_avg, 2))
+        col3.metric("🔥 High Performance Streak", streak)
         
         # Best day
         best_day = df.loc[df["execution_score"].idxmax()]
@@ -125,6 +125,39 @@ if page == "Dashboard":
         st.subheader("Score Trend")
         st.line_chart(df["execution_score"])
 
+        st.subheader("🧠 Productivity Insights")
+        high_energy_days = df[df["energy_level"] >= 7]
+        low_energy_days = df[df["energy_level"] < 7]
+
+        if len(high_energy_days) > 0 and len(low_energy_days) > 0:
+
+            high_energy_score = high_energy_days["execution_score"].mean()
+            low_energy_score = low_energy_days["execution_score"].mean()
+
+            if high_energy_score > low_energy_score:
+                st.write("⚡ You perform better on high energy days.")
+                
+        deep_focus_days = df[df["deep_work_hours"] >= 3]
+        low_focus_days = df[df["deep_work_hours"] < 3]
+
+        if len(deep_focus_days) > 0 and len(low_focus_days) > 0:
+
+            deep_score = deep_focus_days["execution_score"].mean()
+            low_score = low_focus_days["execution_score"].mean()
+
+            if deep_score > low_score:
+                st.write("🎯 Deep work significantly improves your execution score.")
+                
+        high_distraction = df[df["distraction_hours"] > 2]
+        low_distraction = df[df["distraction_hours"] <= 2]
+
+        if len(high_distraction) > 0 and len(low_distraction) > 0:
+
+            high_d_score = high_distraction["execution_score"].mean()
+            low_d_score = low_distraction["execution_score"].mean()
+
+            if high_d_score < low_d_score:
+                st.write("⚠️ High distractions reduce your productivity.")
 # ===========================
 # DAILY LOG
 # ===========================
