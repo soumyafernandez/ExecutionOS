@@ -95,6 +95,21 @@ if page == "Dashboard":
         st.subheader("All Entries")
         st.dataframe(df)
 
+        # Delete section
+        st.subheader("🗑 Delete Entry")
+
+        entry_index = st.number_input(
+            "Enter row number to delete",
+            min_value=0,
+            max_value=len(df)-1,
+            step=1
+        )
+
+        if st.button("Delete Selected Entry"):
+            df = df.drop(entry_index)
+            df.to_csv(DATA_PATH, index=False)
+            st.success("Entry deleted successfully. Refresh page.")
+            
         # Deep work vs distraction
         st.subheader("Deep Work vs Distraction")
 
