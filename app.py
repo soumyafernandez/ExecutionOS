@@ -94,6 +94,41 @@ if page == "Dashboard":
         
         st.subheader("All Entries")
         st.dataframe(df)
+        
+        st.subheader("📥 Download Your Data")
+
+        csv = df.to_csv(index=False).encode("utf-8")
+
+        st.download_button(
+            label="Download Productivity Logs",
+            data=csv,
+            file_name="execution_logs.csv",
+            mime="text/csv"
+        )
+        
+        st.subheader("📊 Weekly Productivity Report")
+
+        last7 = df.tail(7)
+
+        weekly_report = {
+            "Average Score": round(last7["execution_score"].mean(),2),
+            "Total Deep Work Hours": round(last7["deep_work_hours"].sum(),2),
+            "Total Distraction Hours": round(last7["distraction_hours"].sum(),2),
+            "Tasks Completed": int(last7["completed_tasks"].sum())
+        }
+
+        report_df = pd.DataFrame([weekly_report])
+
+        st.dataframe(report_df)
+        
+        report_csv = report_df.to_csv(index=False).encode("utf-8")
+
+        st.download_button(
+            label="Download Weekly Report",
+            data=report_csv,
+            file_name="weekly_productivity_report.csv",
+            mime="text/csv"
+        )
 
         # Delete section
         st.subheader("🗑 Delete Entry")
@@ -109,7 +144,7 @@ if page == "Dashboard":
             df = df.drop(entry_index)
             df.to_csv(DATA_PATH, index=False)
             st.success("Entry deleted successfully. Refresh page.")
-            
+          
         # Deep work vs distraction
         st.subheader("Deep Work vs Distraction")
 
